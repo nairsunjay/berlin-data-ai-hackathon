@@ -1,0 +1,273 @@
+/* Lightdash Licensing Advisor - Questionnaire Overlay */
+
+#lq-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#lq-panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+}
+
+#lq-panel .lq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+#lq-panel .lq-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+#lq-panel .lq-subtitle {
+  font-size: 13px;
+  color: #868e96;
+  margin: 0 0 24px 0;
+}
+
+#lq-panel .lq-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #adb5bd;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+#lq-panel .lq-close:hover {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+/* Progress breadcrumb */
+#lq-panel .lq-breadcrumb {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#lq-panel .lq-crumb {
+  font-size: 12px;
+  color: #228be6;
+  background: #e7f5ff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#lq-panel .lq-crumb-sep {
+  color: #ced4da;
+  font-size: 11px;
+}
+
+/* Question */
+#lq-panel .lq-question {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 16px 0;
+}
+
+/* Options */
+#lq-panel .lq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#lq-panel .lq-option {
+  background: #f8f9fa;
+  border: 1.5px solid #dee2e6;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+
+#lq-panel .lq-option:hover {
+  border-color: #228be6;
+  background: #e7f5ff;
+  color: #1971c2;
+}
+
+#lq-panel .lq-option:active {
+  transform: scale(0.98);
+}
+
+/* Back button */
+#lq-panel .lq-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #868e96;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-top: 16px;
+}
+
+#lq-panel .lq-back:hover {
+  color: #495057;
+}
+
+/* Summary / confirm screen */
+#lq-panel .lq-summary {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+#lq-panel .lq-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+#lq-panel .lq-summary-row:last-child {
+  border-bottom: none;
+}
+
+#lq-panel .lq-summary-label {
+  color: #868e96;
+  font-weight: 500;
+}
+
+#lq-panel .lq-summary-value {
+  color: #212529;
+  font-weight: 600;
+  text-align: right;
+  max-width: 250px;
+}
+
+/* Submit button */
+#lq-panel .lq-submit {
+  width: 100%;
+  padding: 12px;
+  background: #228be6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+#lq-panel .lq-submit:hover {
+  background: #1c7ed6;
+}
+
+#lq-panel .lq-submit:active {
+  background: #1971c2;
+  transform: scale(0.98);
+}
+
+/* Prompt preview */
+#lq-panel .lq-prompt-preview {
+  background: #f1f3f5;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: #495057;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  max-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+/* Floating trigger button */
+#lq-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99998;
+  background: #228be6;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(34, 139, 230, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+#lq-trigger:hover {
+  background: #1c7ed6;
+  box-shadow: 0 6px 20px rgba(34, 139, 230, 0.5);
+  transform: translateY(-2px);
+}
+
+#lq-trigger svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Step indicator dots */
+#lq-panel .lq-steps {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+#lq-panel .lq-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dee2e6;
+  transition: background 0.2s ease;
+}
+
+#lq-panel .lq-step-dot.active {
+  background: #228be6;
+}
+
+#lq-panel .lq-step-dot.done {
+  background: #51cf66;
+}
