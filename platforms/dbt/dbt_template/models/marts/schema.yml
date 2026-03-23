@@ -1,0 +1,345 @@
+version: 2
+
+models:
+
+  - name: fct_licensing_priority
+    description: >
+      Core licensing intelligence model. Every title scored by AVOD and TVOD revenue
+      potential, with a cost proxy and overall licensing ROI ranking.
+      Use this as the primary exploration table in Lightdash.
+    config:
+      meta:
+        label: "Licensing Priority"
+
+    columns:
+      - name: entity_id
+        description: JustWatch content ID (tm = movie, ts = show). Primary key.
+        meta:
+          dimension:
+            type: string
+            label: "Entity ID"
+
+      - name: title
+        description: Display title in English.
+        meta:
+          dimension:
+            type: string
+            label: "Title"
+
+      - name: object_type
+        description: "Content type: movie or show."
+        meta:
+          dimension:
+            type: string
+            label: "Type"
+
+      - name: release_year
+        description: Release year of the title.
+        meta:
+          dimension:
+            type: number
+            label: "Release Year"
+
+      - name: imdb_score
+        description: IMDB rating (0–10).
+        meta:
+          dimension:
+            type: number
+            label: "IMDB Score"
+
+      - name: original_language
+        description: ISO 639-1 language code of original production.
+        meta:
+          dimension:
+            type: string
+            label: "Original Language"
+
+      - name: market_count
+        description: Number of distinct markets where this title received engagement.
+        meta:
+          dimension:
+            type: number
+            label: "Markets"
+          metrics:
+            avg_market_count:
+              type: average
+              label: "Avg Market Count"
+
+      - name: total_users
+        description: Total unique users who interacted with this title (summed across markets).
+        meta:
+          metrics:
+            total_unique_users:
+              type: sum
+              label: "Total Unique Users"
+
+      - name: has_avod_offer
+        description: True if at least one AVOD (free/ads) clickout was observed for this title.
+        meta:
+          dimension:
+            type: boolean
+            label: "Has AVOD Offer"
+
+      - name: has_svod_offer
+        description: True if at least one flatrate (SVOD) clickout was observed.
+        meta:
+          dimension:
+            type: boolean
+            label: "Has SVOD Offer"
+
+      - name: has_tvod_offer
+        description: True if at least one rent or buy clickout was observed.
+        meta:
+          dimension:
+            type: boolean
+            label: "Has TVOD Offer"
+
+      - name: provider_count
+        description: Number of distinct providers with clickouts for this title.
+        meta:
+          metrics:
+            avg_provider_count:
+              type: average
+              label: "Avg Provider Count"
+
+      - name: avod_score
+        description: >
+          AVOD revenue potential score. Weighted sum of engagement signals
+          (page views, clicks, trailer plays, watchlist adds, flatrate + avod clickouts)
+          multiplied by a cross-market bonus (LN of market count + 1).
+        meta:
+          metrics:
+            total_avod_score:
+              type: sum
+              label: "Total AVOD Score"
+            avg_avod_score:
+              type: average
+              label: "Avg AVOD Score"
+
+      - name: tvod_score
+        description: >
+          TVOD revenue potential score. Weighted sum of rent and buy clickouts
+          multiplied by a cross-market bonus.
+        meta:
+          metrics:
+            total_tvod_score:
+              type: sum
+              label: "Total TVOD Score"
+            avg_tvod_score:
+              type: average
+              label: "Avg TVOD Score"
+
+      - name: cost_proxy
+        description: >
+          Estimated licensing cost/difficulty. Based on IMDB score (quality signal),
+          recency (newer = more expensive), and content type (shows cost more due to
+          multi-season deal complexity).
+        meta:
+          metrics:
+            avg_cost_proxy:
+              type: average
+              label: "Avg Cost Proxy"
+
+      - name: avod_roi
+        description: AVOD score divided by cost proxy. Higher = better AVOD licensing value.
+        meta:
+          metrics:
+            avg_avod_roi:
+              type: average
+              label: "Avg AVOD ROI"
+
+      - name: tvod_roi
+        description: TVOD score divided by cost proxy. Higher = better TVOD licensing value.
+        meta:
+          metrics:
+            avg_tvod_roi:
+              type: average
+              label: "Avg TVOD ROI"
+
+      - name: licensing_priority_score
+        description: >
+          Overall licensing priority: (avod_score + tvod_score) / cost_proxy.
+          Primary ranking metric. Higher = license this title first.
+        meta:
+          metrics:
+            avg_licensing_priority_score:
+              type: average
+              label: "Avg Licensing Priority Score"
+
+      - name: is_avod_gap
+        description: >
+          True when avod_score > 0 AND no AVOD offer exists. These titles have
+          demonstrated user demand for free content but aren't available for free —
+          prime licensing targets.
+        meta:
+          dimension:
+            type: boolean
+            label: "Is AVOD Gap"
+
+
+  - name: fct_underserved_demand
+    description: >
+      Top-quartile demand titles with no current AVOD offer.
+      These are the highest-priority licensing targets for JustWatch's ad-supported service.
+    config:
+      meta:
+        label: "Underserved Demand"
+
+    columns:
+      - name: entity_id
+        description: JustWatch content ID. Primary key.
+
+      - name: title
+        description: Display title.
+        meta:
+          dimension:
+            type: string
+            label: "Title"
+
+      - name: object_type
+        description: "movie or show."
+        meta:
+          dimension:
+            type: string
+            label: "Type"
+
+      - name: release_year
+        description: Release year.
+        meta:
+          dimension:
+            type: number
+            label: "Release Year"
+
+      - name: genres
+        description: Comma-separated list of genres from TMDB.
+        meta:
+          dimension:
+            type: string
+            label: "Genres"
+
+      - name: market_count
+        description: Number of markets with engagement.
+        meta:
+          dimension:
+            type: number
+            label: "Markets"
+
+      - name: total_users
+        description: Total unique users across markets.
+        meta:
+          metrics:
+            total_unique_users:
+              type: sum
+              label: "Total Unique Users"
+
+      - name: avod_score
+        description: AVOD demand score.
+        meta:
+          metrics:
+            total_avod_score:
+              type: sum
+              label: "Total AVOD Score"
+
+      - name: demand_gap_rank
+        description: Rank by AVOD score (1 = highest demand without AVOD availability).
+        meta:
+          dimension:
+            type: number
+            label: "Demand Gap Rank"
+
+
+  - name: fct_genre_licensing
+    description: >
+      Genre-level AVOD vs TVOD suitability analysis. Use for the genre heatmap dashboard
+      showing which genres to prioritize for ad-supported vs transactional licensing.
+    config:
+      meta:
+        label: "Genre Licensing"
+
+    columns:
+      - name: genre
+        description: Genre name from TMDB.
+        meta:
+          dimension:
+            type: string
+            label: "Genre"
+
+      - name: object_type
+        description: "movie or show."
+        meta:
+          dimension:
+            type: string
+            label: "Type"
+
+      - name: title_count
+        description: Number of titles in this genre.
+        meta:
+          metrics:
+            total_title_count:
+              type: sum
+              label: "Title Count"
+
+      - name: total_users
+        description: Total unique users engaging with titles in this genre.
+        meta:
+          metrics:
+            total_unique_users:
+              type: sum
+              label: "Total Unique Users"
+
+      - name: total_avod_score
+        description: Sum of AVOD scores across all titles in this genre.
+        meta:
+          metrics:
+            sum_avod_score:
+              type: sum
+              label: "Total AVOD Score"
+
+      - name: total_tvod_score
+        description: Sum of TVOD scores across all titles in this genre.
+        meta:
+          metrics:
+            sum_tvod_score:
+              type: sum
+              label: "Total TVOD Score"
+
+      - name: avg_avod_roi
+        description: Average AVOD ROI across titles in this genre.
+        meta:
+          metrics:
+            mean_avod_roi:
+              type: average
+              label: "Avg AVOD ROI"
+
+      - name: avg_tvod_roi
+        description: Average TVOD ROI across titles in this genre.
+        meta:
+          metrics:
+            mean_tvod_roi:
+              type: average
+              label: "Avg TVOD ROI"
+
+      - name: avod_offer_rate
+        description: Fraction of titles in this genre that have an AVOD offer (0–1).
+        meta:
+          dimension:
+            type: number
+            label: "AVOD Offer Rate"
+
+      - name: avod_gap_rate
+        description: >
+          Fraction of titles with high demand but no AVOD offer (0–1).
+          Higher = bigger licensing opportunity in this genre.
+        meta:
+          dimension:
+            type: number
+            label: "AVOD Gap Rate"
+
+      - name: avod_tvod_ratio
+        description: >
+          AVOD score / TVOD score ratio. >1 = genre is more AVOD-suitable.
+          <1 = genre skews toward transactional (rent/buy) revenue.
+        meta:
+          dimension:
+            type: number
+            label: "AVOD/TVOD Ratio"
