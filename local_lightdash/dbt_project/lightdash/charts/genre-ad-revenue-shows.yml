@@ -1,0 +1,45 @@
+version: 1
+name: "Genre Ad Revenue Potential (Shows)"
+slug: "genre-ad-revenue-shows"
+spaceSlug: "licensing-intelligence"
+tableName: "mart_genre_performance"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  exploreName: "mart_genre_performance"
+  dimensions:
+    - "mart_genre_performance_genre"
+  metrics:
+    - "mart_genre_performance_sum_genre_ad_revenue"
+    - "mart_genre_performance_mean_cpm"
+  filters: {}
+  tableCalculations: []
+  sorts:
+    - fieldId: "mart_genre_performance_sum_genre_ad_revenue"
+      descending: true
+  limit: 15
+
+chartConfig:
+  type: "cartesian"
+  config:
+    layout:
+      xField: "mart_genre_performance_genre"
+      yField:
+        - "mart_genre_performance_sum_genre_ad_revenue"
+      flipAxes: true
+    eChartsConfig:
+      xAxis:
+        - name: "Est. Ad Revenue (USD)"
+      yAxis:
+        - name: "Genre"
+      grid:
+        containLabel: true
+      series:
+        - type: "bar"
+          name: "Est. Ad Revenue (USD)"
+          color: "#8B5CF6"
+          encode:
+            xRef:
+              field: "mart_genre_performance_genre"
+            yRef:
+              field: "mart_genre_performance_sum_genre_ad_revenue"

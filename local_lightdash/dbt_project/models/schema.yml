@@ -296,3 +296,218 @@ models:
         meta:
           metrics:
             sum_users: { type: sum, label: "Total Users" }
+
+  - name: mart_title_ad_revenue
+    description: >
+      Title-level ad revenue estimates (primary licensing output).
+      One row per title. Revenue formula: est_ad_revenue = estimated_views × watch_hours × 6 ads/hr × adjusted_CPM / 1000.
+      licensing_score = est_ad_revenue × supply_gap_score × quality_score_norm.
+    columns:
+      - name: title_id
+        meta:
+          dimension: { type: string, label: "Title ID" }
+      - name: title
+        meta:
+          dimension: { type: string, label: "Title" }
+      - name: object_type
+        meta:
+          dimension: { type: string, label: "Type (Movie/Show)" }
+      - name: release_year
+        meta:
+          dimension: { type: number, label: "Release Year" }
+      - name: freshness_category
+        meta:
+          dimension: { type: string, label: "Freshness" }
+      - name: quality_tier
+        meta:
+          dimension: { type: string, label: "Quality Tier" }
+      - name: genres
+        meta:
+          dimension: { type: string, label: "Genres" }
+      - name: avod_tier
+        meta:
+          dimension: { type: string, label: "AVOD Tier (A/B/C)" }
+      - name: audience_segment
+        meta:
+          dimension: { type: string, label: "Audience Segment" }
+      - name: brand_safety
+        meta:
+          dimension: { type: string, label: "Brand Safety" }
+      - name: has_avod_supply
+        meta:
+          dimension: { type: boolean, label: "Has AVOD Supply" }
+      - name: supply_gap_score
+        meta:
+          dimension: { type: number, label: "Supply Gap Score" }
+          metrics:
+            avg_supply_gap: { type: average, label: "Avg Supply Gap Score" }
+      - name: licensing_rank
+        meta:
+          dimension: { type: number, label: "Licensing Rank" }
+      - name: licensing_score
+        meta:
+          metrics:
+            total_licensing_score: { type: sum, label: "Total Licensing Score" }
+            avg_licensing_score: { type: average, label: "Avg Licensing Score" }
+      - name: est_ad_revenue_usd
+        meta:
+          metrics:
+            total_est_ad_revenue: { type: sum, label: "Est. Ad Revenue (USD)", format: "usd" }
+            avg_est_ad_revenue: { type: average, label: "Avg Est. Ad Revenue (USD)", format: "usd" }
+      - name: est_tvod_revenue_usd
+        meta:
+          metrics:
+            total_est_tvod_revenue: { type: sum, label: "Est. TVOD Revenue (USD)", format: "usd" }
+      - name: estimated_views
+        meta:
+          metrics:
+            total_estimated_views: { type: sum, label: "Total Estimated Views" }
+      - name: avod_clickouts
+        meta:
+          metrics:
+            total_avod_clickouts: { type: sum, label: "Total AVOD Clickouts" }
+      - name: tvod_clickouts
+        meta:
+          metrics:
+            total_tvod_clickouts: { type: sum, label: "Total TVOD Clickouts" }
+      - name: total_users
+        meta:
+          metrics:
+            total_users_reach: { type: sum, label: "Total Users (Reach)" }
+      - name: adjusted_cpm
+        meta:
+          metrics:
+            avg_adjusted_cpm: { type: average, label: "Avg Adjusted CPM (USD)", format: "usd" }
+      - name: market_count
+        meta:
+          metrics:
+            avg_market_count: { type: average, label: "Avg Markets Present" }
+
+  - name: mart_genre_performance
+    description: >
+      Genre-level licensing strategy. Aggregates estimated ad revenue, CPM,
+      and demand signals by genre. Answers: which genres are best for AVOD vs TVOD?
+    columns:
+      - name: genre
+        meta:
+          dimension: { type: string, label: "Genre" }
+      - name: object_type
+        meta:
+          dimension: { type: string, label: "Type (Movie/Show)" }
+      - name: title_count
+        meta:
+          metrics:
+            sum_title_count: { type: sum, label: "Title Count" }
+      - name: total_users
+        meta:
+          metrics:
+            sum_total_users: { type: sum, label: "Total Users" }
+      - name: total_avod_clickouts
+        meta:
+          metrics:
+            sum_avod_clickouts: { type: sum, label: "Total AVOD Clickouts" }
+      - name: total_tvod_clickouts
+        meta:
+          metrics:
+            sum_tvod_clickouts: { type: sum, label: "Total TVOD Clickouts" }
+      - name: avg_cpm
+        meta:
+          metrics:
+            mean_cpm: { type: average, label: "Avg CPM (USD)", format: "usd" }
+      - name: total_est_ad_revenue
+        meta:
+          metrics:
+            sum_genre_ad_revenue: { type: sum, label: "Total Est. Ad Revenue (USD)", format: "usd" }
+      - name: total_est_tvod_revenue
+        meta:
+          metrics:
+            sum_genre_tvod_revenue: { type: sum, label: "Total Est. TVOD Revenue (USD)", format: "usd" }
+      - name: total_est_revenue
+        meta:
+          metrics:
+            sum_genre_total_revenue: { type: sum, label: "Total Est. Revenue (USD)", format: "usd" }
+      - name: avg_supply_gap_score
+        meta:
+          metrics:
+            mean_supply_gap: { type: average, label: "Avg Supply Gap Score" }
+      - name: avod_coverage_rate
+        meta:
+          metrics:
+            mean_avod_coverage: { type: average, label: "AVOD Coverage Rate", format: "percent" }
+      - name: avg_quality_score
+        meta:
+          metrics:
+            mean_quality: { type: average, label: "Avg Quality Score" }
+      - name: avg_imdb_score
+        meta:
+          metrics:
+            mean_imdb: { type: average, label: "Avg IMDb Score" }
+      - name: avod_intent_share
+        meta:
+          metrics:
+            mean_avod_intent: { type: average, label: "AVOD Intent Share", format: "percent" }
+      - name: tvod_intent_share
+        meta:
+          metrics:
+            mean_tvod_intent: { type: average, label: "TVOD Intent Share", format: "percent" }
+
+  - name: mart_market_opportunity
+    description: >
+      Per-market licensing opportunity (T2 = 8 EU markets).
+      Shows which markets have the highest AVOD revenue potential and supply gaps.
+      Input to market entry decisions.
+    columns:
+      - name: market
+        meta:
+          dimension: { type: string, label: "Market (Country Code)" }
+      - name: market_rank
+        meta:
+          dimension: { type: number, label: "Market Priority Rank" }
+      - name: titles_with_demand
+        meta:
+          metrics:
+            sum_titles_with_demand: { type: sum, label: "Titles with Demand" }
+      - name: avg_clickout_rate
+        meta:
+          metrics:
+            mean_clickout_rate: { type: average, label: "Avg Clickout Rate", format: "percent" }
+      - name: total_unique_users
+        meta:
+          metrics:
+            sum_unique_users: { type: sum, label: "Total Unique Users" }
+      - name: total_events
+        meta:
+          metrics:
+            sum_market_events: { type: sum, label: "Total Events" }
+      - name: avod_clickouts
+        meta:
+          metrics:
+            sum_market_avod: { type: sum, label: "AVOD Clickouts" }
+      - name: tvod_clickouts
+        meta:
+          metrics:
+            sum_market_tvod: { type: sum, label: "TVOD Clickouts" }
+      - name: svod_clickouts
+        meta:
+          metrics:
+            sum_market_svod: { type: sum, label: "SVOD Clickouts" }
+      - name: watchlist_adds
+        meta:
+          metrics:
+            sum_market_watchlist: { type: sum, label: "Watchlist Adds" }
+      - name: est_ad_revenue
+        meta:
+          metrics:
+            sum_market_ad_revenue: { type: sum, label: "Est. Ad Revenue (USD)", format: "usd" }
+      - name: est_tvod_revenue
+        meta:
+          metrics:
+            sum_market_tvod_revenue: { type: sum, label: "Est. TVOD Revenue (USD)", format: "usd" }
+      - name: total_est_revenue
+        meta:
+          metrics:
+            sum_market_total_revenue: { type: sum, label: "Total Est. Revenue (USD)", format: "usd" }
+      - name: revenue_per_user
+        meta:
+          metrics:
+            mean_revenue_per_user: { type: average, label: "Revenue Per User (USD)", format: "usd" }

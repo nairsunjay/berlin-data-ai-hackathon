@@ -17,3 +17,7 @@ models:
   tpch_local:
     +materialized: table
     +schema: marts
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view

@@ -1,0 +1,166 @@
+version: 1
+name: "Ad Revenue Licensing Intelligence"
+slug: "ad-revenue-licensing"
+spaceSlug: "licensing-intelligence"
+description: "Title, genre, and market-level ad revenue estimates from the full licensing pipeline. Powered by JustWatch behavioral data (T2, 8 EU markets, Dec 2025) + Cortex AI enrichment."
+
+tabs:
+  - uuid: "21da8156-83a4-4480-8746-f1d14546417a"
+    name: "Revenue Overview"
+    order: 0
+  - uuid: "9e0acc98-b075-40a0-982e-4f9b3a09f41b"
+    name: "Title Rankings"
+    order: 1
+  - uuid: "19ea8f6e-d657-44f6-ac5c-197de5c4ab84"
+    name: "Genre Intelligence"
+    order: 2
+
+tiles:
+  # ── Revenue Overview tab ──────────────────────────────────────────────────
+
+  # Row 1: KPI total revenue (full width)
+  - type: saved_chart
+    tabUuid: "21da8156-83a4-4480-8746-f1d14546417a"
+    x: 0
+    y: 0
+    w: 36
+    h: 4
+    properties:
+      chartSlug: "kpi-total-pipeline-revenue"
+      title: "Total Est. Revenue Across 8 EU Markets"
+
+  # Row 2: Market revenue comparison (left) + per-user efficiency (right)
+  - type: saved_chart
+    tabUuid: "21da8156-83a4-4480-8746-f1d14546417a"
+    x: 0
+    y: 4
+    w: 22
+    h: 11
+    properties:
+      chartSlug: "market-revenue-comparison"
+      title: "Est. AVOD & TVOD Revenue by Market"
+
+  - type: saved_chart
+    tabUuid: "21da8156-83a4-4480-8746-f1d14546417a"
+    x: 22
+    y: 4
+    w: 14
+    h: 11
+    properties:
+      chartSlug: "market-revenue-per-user"
+      title: "Revenue Efficiency (Per User)"
+
+  # Row 3: Methodology note
+  - type: markdown
+    tabUuid: "21da8156-83a4-4480-8746-f1d14546417a"
+    x: 0
+    y: 15
+    w: 36
+    h: 4
+    properties:
+      title: "How revenue is estimated"
+      content: |
+        **Formula:** `Est. Ad Revenue = Estimated Views × Watch Hours × 6 ads/hr × adjusted CPM / 1000`
+
+        **Adjusted CPM** = base genre CPM × audience multiplier × brand safety multiplier × freshness multiplier × AVOD tier multiplier
+
+        **Audience & AVOD tier** — classified per title by Snowflake Cortex AI (llama3.1-8b) on top 10K most-engaged titles.
+        Remaining titles default to Tier B / moderate brand safety.
+
+        > **Revenue per user** measures market efficiency — FR and US show the highest return per engaged user despite lower total volume.
+
+  # ── Title Rankings tab ────────────────────────────────────────────────────
+
+  - type: heading
+    tabUuid: "9e0acc98-b075-40a0-982e-4f9b3a09f41b"
+    x: 0
+    y: 0
+    w: 36
+    h: 1
+    properties:
+      text: "Top titles ranked by estimated ad revenue potential across all 8 EU markets"
+
+  # Top 20 titles by ad revenue (full width)
+  - type: saved_chart
+    tabUuid: "9e0acc98-b075-40a0-982e-4f9b3a09f41b"
+    x: 0
+    y: 1
+    w: 36
+    h: 14
+    properties:
+      chartSlug: "top-20-titles-ad-revenue"
+      title: "Top 20 Titles — Est. Ad Revenue (USD)"
+
+  # Licensing score explainer
+  - type: markdown
+    tabUuid: "9e0acc98-b075-40a0-982e-4f9b3a09f41b"
+    x: 0
+    y: 15
+    w: 36
+    h: 4
+    properties:
+      title: "Est. Ad Revenue vs Licensing Score"
+      content: |
+        **Est. Ad Revenue** (this chart) — raw revenue potential based on demand volume × CPM.
+        Titles with broad reach (e.g. One Piece) rank high here.
+
+        **Licensing Score** = Est. Ad Revenue × Supply Gap Score × Quality Score
+        This rewards titles that are *under-supplied* — fewer current providers means lower acquisition cost and higher ROI.
+
+        > A title with $500K revenue and 1 provider (gap score 0.8) beats a $700K title available on 12 platforms (gap score 0.1) on licensing ROI.
+
+  # ── Genre Intelligence tab ────────────────────────────────────────────────
+
+  - type: heading
+    tabUuid: "19ea8f6e-d657-44f6-ac5c-197de5c4ab84"
+    x: 0
+    y: 0
+    w: 36
+    h: 1
+    properties:
+      text: "Genre-level revenue potential and AVOD vs TVOD intent — where should JustWatch focus licensing?"
+
+  # Genre ad revenue bar (left) + AVOD vs TVOD comparison (right)
+  - type: saved_chart
+    tabUuid: "19ea8f6e-d657-44f6-ac5c-197de5c4ab84"
+    x: 0
+    y: 1
+    w: 20
+    h: 12
+    properties:
+      chartSlug: "genre-ad-revenue-shows"
+      title: "Est. Ad Revenue by Genre (Shows)"
+
+  - type: saved_chart
+    tabUuid: "19ea8f6e-d657-44f6-ac5c-197de5c4ab84"
+    x: 20
+    y: 1
+    w: 16
+    h: 12
+    properties:
+      chartSlug: "genre-avod-tvod-comparison"
+      title: "AVOD vs TVOD Demand by Genre"
+
+  # Genre insights
+  - type: markdown
+    tabUuid: "19ea8f6e-d657-44f6-ac5c-197de5c4ab84"
+    x: 0
+    y: 13
+    w: 36
+    h: 5
+    properties:
+      title: "Key genre insights"
+      content: |
+        **Drama shows** dominate with $7.1M estimated ad revenue potential — highest CPM ($25 base) and broad AVOD intent (85%).
+
+        **Crime & Thriller** carry the highest CPM (~$18) relative to volume — premium advertiser segments.
+
+        **Animation & Reality** show the highest AVOD intent share (89–92%) — audiences strongly prefer free/ad-supported for these genres.
+
+        **TVOD opportunity** — genres with a high TVOD demand share (e.g. action movies, thrillers) are better suited for rent/buy licensing.
+
+        > **Recommendation:** Prioritise drama and crime/thriller shows for AVOD licensing. Use TVOD for action/thriller movies with lower AVOD intent.
+
+config:
+  isDateZoomDisabled: true
+  isAddFilterDisabled: false

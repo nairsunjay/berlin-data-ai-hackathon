@@ -6,10 +6,12 @@ tableName: "fct_licensing_priority"
 updatedAt: "2026-03-23T00:00:00.000Z"
 
 metricQuery:
+  exploreName: "fct_licensing_priority"
   dimensions: []
   metrics:
     - "fct_licensing_priority_sum_users"
   filters: {}
+  tableCalculations: []
   sorts: []
   limit: 1
 

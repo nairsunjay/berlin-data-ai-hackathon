@@ -1,0 +1,148 @@
+version: 1
+name: "Challenge 6 — Content Licensing Intelligence"
+slug: "challenge-6-licensing"
+spaceSlug: "licensing-intelligence"
+description: "Which titles should JustWatch license for AVOD/TVOD? Built from JustWatch behavioral data (T2, 8 EU markets, Dec 2025)."
+
+tabs:
+  - uuid: "af63e1f6-8760-4641-9c36-8eef9b028005"
+    name: "Overview"
+    order: 0
+  - uuid: "a10d05c9-a7d9-4293-b154-44295e8a408e"
+    name: "Licensing Gaps"
+    order: 1
+  - uuid: "64848b47-badb-4335-a620-3df557508ebd"
+    name: "Genre Analysis"
+    order: 2
+
+tiles:
+  # ── Overview tab ──────────────────────────────────────────────────────────
+
+  # Row 1: KPIs (3 across)
+  - type: saved_chart
+    tabUuid: "af63e1f6-8760-4641-9c36-8eef9b028005"
+    x: 0
+    y: 0
+    w: 12
+    h: 4
+    properties:
+      chartSlug: "kpi-total-users"
+      title: "Users Engaged with Scored Content"
+
+  - type: saved_chart
+    tabUuid: "af63e1f6-8760-4641-9c36-8eef9b028005"
+    x: 12
+    y: 0
+    w: 12
+    h: 4
+    properties:
+      chartSlug: "kpi-avod-gap-demand"
+      title: "AVOD Clickouts on Gap Titles"
+
+  - type: saved_chart
+    tabUuid: "af63e1f6-8760-4641-9c36-8eef9b028005"
+    x: 24
+    y: 0
+    w: 12
+    h: 4
+    properties:
+      chartSlug: "kpi-avod-tvod-ratio"
+      title: "AVOD / TVOD Demand Ratio"
+
+  # Row 2: Top 20 priority titles (full width)
+  - type: saved_chart
+    tabUuid: "af63e1f6-8760-4641-9c36-8eef9b028005"
+    x: 0
+    y: 4
+    w: 36
+    h: 12
+    properties:
+      chartSlug: "top-20-priority-titles"
+      title: "Top 20 Licensing Priority Titles"
+
+  # ── Licensing Gaps tab ────────────────────────────────────────────────────
+
+  - type: heading
+    tabUuid: "a10d05c9-a7d9-4293-b154-44295e8a408e"
+    x: 0
+    y: 0
+    w: 36
+    h: 1
+    properties:
+      text: "Titles with high demand but no current AVOD offer — prime acquisition targets"
+
+  # Row 1: Bar chart of top gap titles
+  - type: saved_chart
+    tabUuid: "a10d05c9-a7d9-4293-b154-44295e8a408e"
+    x: 0
+    y: 1
+    w: 36
+    h: 12
+    properties:
+      chartSlug: "top-20-licensing-gap"
+      title: "Top 20 Licensing Gap Titles"
+
+  # Row 2: Full detail table
+  - type: saved_chart
+    tabUuid: "a10d05c9-a7d9-4293-b154-44295e8a408e"
+    x: 0
+    y: 13
+    w: 36
+    h: 12
+    properties:
+      chartSlug: "licensing-gap-table"
+      title: "Licensing Gap — Full List (Top 100)"
+
+  # ── Genre Analysis tab ────────────────────────────────────────────────────
+
+  - type: heading
+    tabUuid: "64848b47-badb-4335-a620-3df557508ebd"
+    x: 0
+    y: 0
+    w: 36
+    h: 1
+    properties:
+      text: "Which genres are best suited for AVOD vs TVOD licensing?"
+
+  # Row 1: AVOD vs TVOD score comparison (left), gap rate (right)
+  - type: saved_chart
+    tabUuid: "64848b47-badb-4335-a620-3df557508ebd"
+    x: 0
+    y: 1
+    w: 22
+    h: 10
+    properties:
+      chartSlug: "genre-avod-tvod-comparison"
+      title: "AVOD vs TVOD Score by Genre"
+
+  - type: saved_chart
+    tabUuid: "64848b47-badb-4335-a620-3df557508ebd"
+    x: 22
+    y: 1
+    w: 14
+    h: 10
+    properties:
+      chartSlug: "genre-avod-gap-rate"
+      title: "AVOD Gap Rate by Genre"
+
+  # Insights markdown
+  - type: markdown
+    tabUuid: "64848b47-badb-4335-a620-3df557508ebd"
+    x: 0
+    y: 11
+    w: 36
+    h: 5
+    properties:
+      title: "How to read this"
+      content: |
+        **AVOD vs TVOD Score** — higher AVOD score → good fit for ad-supported licensing (high volume, rewatchable).
+        Higher TVOD score → premium or event-driven content better suited to rent/buy.
+
+        **AVOD Gap Rate** — fraction of titles in that genre with strong demand but *no* current AVOD offer.
+        A high gap rate = licensing opportunity: users want to watch for free but can't.
+
+        > Drama and thriller dominate AVOD demand. High-gap-rate genres are the lowest-hanging fruit for JustWatch's new streaming service.
+
+config:
+  isDateZoomDisabled: true
+  isAddFilterDisabled: false

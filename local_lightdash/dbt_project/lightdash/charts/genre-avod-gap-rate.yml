@@ -6,11 +6,13 @@ tableName: "fct_genre_licensing"
 updatedAt: "2026-03-23T00:00:00.000Z"
 
 metricQuery:
+  exploreName: "fct_genre_licensing"
   dimensions:
     - "fct_genre_licensing_genre"
   metrics:
     - "fct_genre_licensing_mean_avod_gap_rate"
   filters: {}
+  tableCalculations: []
   sorts:
     - fieldId: "fct_genre_licensing_mean_avod_gap_rate"
       descending: true

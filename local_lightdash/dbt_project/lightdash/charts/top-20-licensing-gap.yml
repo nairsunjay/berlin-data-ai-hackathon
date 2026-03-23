@@ -6,11 +6,13 @@ tableName: "fct_underserved_demand"
 updatedAt: "2026-03-23T00:00:00.000Z"
 
 metricQuery:
+  exploreName: "fct_underserved_demand"
   dimensions:
     - "fct_underserved_demand_title"
   metrics:
     - "fct_underserved_demand_total_avod_score"
   filters: {}
+  tableCalculations: []
   sorts:
     - fieldId: "fct_underserved_demand_total_avod_score"
       descending: true

@@ -6,11 +6,13 @@ tableName: "fct_licensing_priority"
 updatedAt: "2026-03-23T00:00:00.000Z"
 
 metricQuery:
+  exploreName: "fct_licensing_priority"
   dimensions:
     - "fct_licensing_priority_title"
   metrics:
     - "fct_licensing_priority_avg_priority_score"
   filters: {}
+  tableCalculations: []
   sorts:
     - fieldId: "fct_licensing_priority_avg_priority_score"
       descending: true

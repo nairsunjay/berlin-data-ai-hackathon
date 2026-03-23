@@ -1,0 +1,23 @@
+version: 1
+name: "KPI: Total Est. Ad Revenue (All Markets)"
+slug: "kpi-total-pipeline-revenue"
+spaceSlug: "licensing-intelligence"
+tableName: "mart_market_opportunity"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  exploreName: "mart_market_opportunity"
+  dimensions: []
+  metrics:
+    - "mart_market_opportunity_sum_market_total_revenue"
+    - "mart_market_opportunity_sum_unique_users"
+  filters: {}
+  tableCalculations: []
+  sorts: []
+  limit: 1
+
+chartConfig:
+  type: "big_number"
+  config:
+    label: "Total Est. Revenue (USD)"
+    compact: "K"

@@ -6,10 +6,12 @@ tableName: "fct_underserved_demand"
 updatedAt: "2026-03-23T00:00:00.000Z"
 
 metricQuery:
+  exploreName: "fct_underserved_demand"
   dimensions: []
   metrics:
     - "fct_underserved_demand_sum_avod_clickouts"
   filters: {}
+  tableCalculations: []
   sorts: []
   limit: 1
 

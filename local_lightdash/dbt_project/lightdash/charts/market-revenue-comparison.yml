@@ -1,0 +1,54 @@
+version: 1
+name: "Market Revenue Comparison (AVOD + TVOD)"
+slug: "market-revenue-comparison"
+spaceSlug: "licensing-intelligence"
+tableName: "mart_market_opportunity"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  exploreName: "mart_market_opportunity"
+  dimensions:
+    - "mart_market_opportunity_market"
+  metrics:
+    - "mart_market_opportunity_sum_market_ad_revenue"
+    - "mart_market_opportunity_sum_market_tvod_revenue"
+  filters: {}
+  tableCalculations: []
+  sorts:
+    - fieldId: "mart_market_opportunity_sum_market_ad_revenue"
+      descending: true
+  limit: 20
+
+chartConfig:
+  type: "cartesian"
+  config:
+    layout:
+      xField: "mart_market_opportunity_market"
+      yField:
+        - "mart_market_opportunity_sum_market_ad_revenue"
+        - "mart_market_opportunity_sum_market_tvod_revenue"
+      flipAxes: false
+    eChartsConfig:
+      xAxis:
+        - name: "Market"
+      yAxis:
+        - name: "Est. Revenue (USD)"
+      grid:
+        containLabel: true
+      series:
+        - type: "bar"
+          name: "AVOD Revenue"
+          color: "#6366F1"
+          encode:
+            xRef:
+              field: "mart_market_opportunity_market"
+            yRef:
+              field: "mart_market_opportunity_sum_market_ad_revenue"
+        - type: "bar"
+          name: "TVOD Revenue"
+          color: "#F59E0B"
+          encode:
+            xRef:
+              field: "mart_market_opportunity_market"
+            yRef:
+              field: "mart_market_opportunity_sum_market_tvod_revenue"
