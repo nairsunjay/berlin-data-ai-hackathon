@@ -1,0 +1,298 @@
+version: 2
+
+models:
+
+  - name: orders_summary
+    description: Aggregated order metrics by status, priority and month.
+    columns:
+      - name: order_status
+        meta:
+          dimension: { type: string, label: "Order Status" }
+      - name: order_priority
+        meta:
+          dimension: { type: string, label: "Priority" }
+      - name: order_month
+        meta:
+          dimension: { type: date, label: "Order Month", time_intervals: ["MONTH", "QUARTER", "YEAR"] }
+      - name: order_count
+        meta:
+          metrics:
+            total_orders: { type: sum, label: "Total Orders" }
+      - name: total_revenue
+        meta:
+          metrics:
+            sum_revenue: { type: sum, label: "Total Revenue", format: "usd" }
+      - name: avg_order_value
+        meta:
+          metrics:
+            mean_order_value: { type: average, label: "Avg Order Value", format: "usd" }
+      - name: unique_customers
+        meta:
+          metrics:
+            total_unique_customers: { type: sum, label: "Unique Customers" }
+
+  - name: revenue_by_nation
+    description: Customer revenue broken down by nation and region.
+    columns:
+      - name: nation
+        meta:
+          dimension: { type: string, label: "Nation" }
+      - name: region
+        meta:
+          dimension: { type: string, label: "Region" }
+      - name: order_year
+        meta:
+          dimension: { type: date, label: "Order Year", time_intervals: ["YEAR"] }
+      - name: order_count
+        meta:
+          metrics:
+            total_orders: { type: sum, label: "Total Orders" }
+      - name: net_revenue
+        meta:
+          metrics:
+            sum_net_revenue: { type: sum, label: "Net Revenue", format: "usd" }
+      - name: net_profit
+        meta:
+          metrics:
+            sum_net_profit: { type: sum, label: "Net Profit", format: "usd" }
+
+  - name: part_performance
+    description: Revenue and volume by part type, size and brand.
+    columns:
+      - name: part_type
+        meta:
+          dimension: { type: string, label: "Part Type" }
+      - name: part_size
+        meta:
+          dimension: { type: number, label: "Part Size" }
+      - name: brand
+        meta:
+          dimension: { type: string, label: "Brand" }
+      - name: order_count
+        meta:
+          metrics:
+            total_orders: { type: sum, label: "Total Orders" }
+      - name: total_quantity
+        meta:
+          metrics:
+            sum_quantity: { type: sum, label: "Total Quantity" }
+      - name: net_revenue
+        meta:
+          metrics:
+            sum_net_revenue: { type: sum, label: "Net Revenue", format: "usd" }
+      - name: avg_discount_rate
+        meta:
+          metrics:
+            mean_discount_rate: { type: average, label: "Avg Discount Rate", format: "percent" }
+
+  - name: supplier_reliability
+    description: Late shipment rate and average delay per supplier nation.
+    columns:
+      - name: supplier_nation
+        meta:
+          dimension: { type: string, label: "Supplier Nation" }
+      - name: supplier_region
+        meta:
+          dimension: { type: string, label: "Supplier Region" }
+      - name: total_lineitems
+        meta:
+          metrics:
+            sum_lineitems: { type: sum, label: "Total Line Items" }
+      - name: late_deliveries
+        meta:
+          metrics:
+            sum_late_deliveries: { type: sum, label: "Late Deliveries" }
+      - name: late_rate_pct
+        meta:
+          metrics:
+            mean_late_rate: { type: average, label: "Late Rate %", format: "percent" }
+      - name: avg_delay_days
+        meta:
+          metrics:
+            mean_delay_days: { type: average, label: "Avg Delay (days)" }
+
+  - name: weekly_sessions_by_country
+    description: Weekly session counts by country from JustWatch event data.
+    columns:
+      - name: week_start
+        meta:
+          dimension: { type: date, label: "Week", time_intervals: ["WEEK", "MONTH"] }
+      - name: geo_country
+        meta:
+          dimension: { type: string, label: "Country" }
+      - name: session_count
+        meta:
+          metrics:
+            total_sessions: { type: sum, label: "Total Sessions" }
+      - name: unique_users
+        meta:
+          metrics:
+            total_unique_users: { type: sum, label: "Unique Users" }
+      - name: total_events
+        meta:
+          metrics:
+            sum_events: { type: sum, label: "Total Events" }
+
+  - name: fct_licensing_priority
+    description: >
+      Challenge 6 — Content Licensing Priority. Scores every title by AVOD and
+      TVOD revenue potential. Use to rank titles for JustWatch licensing decisions.
+    columns:
+      - name: entity_id
+        meta:
+          dimension: { type: string, label: "Title ID" }
+      - name: title
+        meta:
+          dimension: { type: string, label: "Title" }
+      - name: object_type
+        meta:
+          dimension: { type: string, label: "Type (movie/show)" }
+      - name: release_year
+        meta:
+          dimension: { type: number, label: "Release Year" }
+      - name: imdb_score
+        meta:
+          dimension: { type: number, label: "IMDb Score" }
+      - name: original_language
+        meta:
+          dimension: { type: string, label: "Language" }
+      - name: market_count
+        meta:
+          dimension: { type: number, label: "Markets" }
+      - name: has_avod_offer
+        meta:
+          dimension: { type: boolean, label: "Has AVOD Offer" }
+      - name: has_svod_offer
+        meta:
+          dimension: { type: boolean, label: "Has SVOD Offer" }
+      - name: has_tvod_offer
+        meta:
+          dimension: { type: boolean, label: "Has TVOD Offer" }
+      - name: is_avod_gap
+        meta:
+          dimension: { type: boolean, label: "AVOD Gap (demand, no offer)" }
+      - name: avod_score
+        meta:
+          metrics:
+            total_avod_score: { type: sum, label: "Total AVOD Score" }
+      - name: tvod_score
+        meta:
+          metrics:
+            total_tvod_score: { type: sum, label: "Total TVOD Score" }
+      - name: licensing_priority_score
+        meta:
+          metrics:
+            avg_priority_score: { type: average, label: "Avg Priority Score" }
+      - name: total_users
+        meta:
+          metrics:
+            sum_users: { type: sum, label: "Total Users" }
+      - name: avod_roi
+        meta:
+          metrics:
+            avg_avod_roi: { type: average, label: "Avg AVOD ROI" }
+      - name: tvod_roi
+        meta:
+          metrics:
+            avg_tvod_roi: { type: average, label: "Avg TVOD ROI" }
+
+  - name: fct_underserved_demand
+    description: >
+      Challenge 6 — Underserved Demand. Top-quartile AVOD demand titles with no
+      current ad-supported offer — highest priority licensing targets.
+    columns:
+      - name: title
+        meta:
+          dimension: { type: string, label: "Title" }
+      - name: object_type
+        meta:
+          dimension: { type: string, label: "Type (movie/show)" }
+      - name: genres
+        meta:
+          dimension: { type: string, label: "Genres" }
+      - name: release_year
+        meta:
+          dimension: { type: number, label: "Release Year" }
+      - name: imdb_score
+        meta:
+          dimension: { type: number, label: "IMDb Score" }
+      - name: market_count
+        meta:
+          dimension: { type: number, label: "Markets" }
+      - name: demand_gap_rank
+        meta:
+          dimension: { type: number, label: "Demand Gap Rank" }
+      - name: has_svod_offer
+        meta:
+          dimension: { type: boolean, label: "Has SVOD Offer" }
+      - name: has_tvod_offer
+        meta:
+          dimension: { type: boolean, label: "Has TVOD Offer" }
+      - name: avod_score
+        meta:
+          metrics:
+            total_avod_score: { type: sum, label: "Total AVOD Score" }
+      - name: tvod_score
+        meta:
+          metrics:
+            total_tvod_score: { type: sum, label: "Total TVOD Score" }
+      - name: total_users
+        meta:
+          metrics:
+            sum_users: { type: sum, label: "Total Users" }
+      - name: watchlist_adds
+        meta:
+          metrics:
+            sum_watchlist_adds: { type: sum, label: "Watchlist Adds" }
+      - name: avod_clickouts
+        meta:
+          metrics:
+            sum_avod_clickouts: { type: sum, label: "AVOD Clickouts" }
+
+  - name: fct_genre_licensing
+    description: >
+      Challenge 6 — Genre Licensing Analysis. AVOD vs TVOD suitability by genre.
+      Use to answer: which genres suit ad-supported vs transactional licensing?
+    columns:
+      - name: genre
+        meta:
+          dimension: { type: string, label: "Genre" }
+      - name: object_type
+        meta:
+          dimension: { type: string, label: "Type (movie/show)" }
+      - name: title_count
+        meta:
+          metrics:
+            sum_titles: { type: sum, label: "Title Count" }
+      - name: total_avod_score
+        meta:
+          metrics:
+            sum_avod_score: { type: sum, label: "Total AVOD Score" }
+      - name: total_tvod_score
+        meta:
+          metrics:
+            sum_tvod_score: { type: sum, label: "Total TVOD Score" }
+      - name: avg_avod_roi
+        meta:
+          metrics:
+            mean_avod_roi: { type: average, label: "Avg AVOD ROI" }
+      - name: avg_tvod_roi
+        meta:
+          metrics:
+            mean_tvod_roi: { type: average, label: "Avg TVOD ROI" }
+      - name: avod_offer_rate
+        meta:
+          metrics:
+            mean_avod_offer_rate: { type: average, label: "AVOD Offer Rate", format: "percent" }
+      - name: avod_gap_rate
+        meta:
+          metrics:
+            mean_avod_gap_rate: { type: average, label: "AVOD Gap Rate", format: "percent" }
+      - name: avod_tvod_ratio
+        meta:
+          metrics:
+            mean_avod_tvod_ratio: { type: average, label: "AVOD/TVOD Ratio" }
+      - name: total_users
+        meta:
+          metrics:
+            sum_users: { type: sum, label: "Total Users" }

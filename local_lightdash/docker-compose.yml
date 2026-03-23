@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+
+  lightdash:
+    image: lightdash/lightdash:latest
+    platform: linux/amd64   # Lightdash has no arm64 image; uses Rosetta emulation on Apple Silicon
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: lightdash
+      PGPASSWORD: lightdash
+      PGDATABASE: lightdash
+      LIGHTDASH_SECRET: tpch-local-secret-change-me
+      PORT: 8080
+      SITE_URL: http://localhost:8080
+      # Disable telemetry in dev
+      RUDDERSTACK_WRITE_KEY: ""
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the dbt project into the container
+      - ./dbt_project:/usr/app/dbt_project
+      # Mount profiles.yml where dbt expects it
+      - ./dbt_project/profiles.yml:/root/.dbt/profiles.yml
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: lightdash
+      POSTGRES_PASSWORD: lightdash
+      POSTGRES_DB: lightdash
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lightdash"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - lightdash_db:/var/lib/postgresql/data
+
+volumes:
+  lightdash_db:

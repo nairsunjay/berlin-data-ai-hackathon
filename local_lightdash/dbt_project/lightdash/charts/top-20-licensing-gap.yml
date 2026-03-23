@@ -1,0 +1,42 @@
+version: 1
+name: "Top 20 Licensing Gap Titles (High Demand, No AVOD Offer)"
+slug: "top-20-licensing-gap"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_underserved_demand"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions:
+    - "fct_underserved_demand_title"
+  metrics:
+    - "fct_underserved_demand_total_avod_score"
+  filters: {}
+  sorts:
+    - fieldId: "fct_underserved_demand_total_avod_score"
+      descending: true
+  limit: 20
+
+chartConfig:
+  type: "cartesian"
+  config:
+    layout:
+      xField: "fct_underserved_demand_title"
+      yField:
+        - "fct_underserved_demand_total_avod_score"
+      flipAxes: true
+    eChartsConfig:
+      xAxis:
+        - name: "AVOD Score"
+      yAxis:
+        - name: "Title"
+      grid:
+        containLabel: true
+      series:
+        - type: "bar"
+          name: "AVOD Score"
+          color: "#10B981"
+          encode:
+            xRef:
+              field: "fct_underserved_demand_title"
+            yRef:
+              field: "fct_underserved_demand_total_avod_score"

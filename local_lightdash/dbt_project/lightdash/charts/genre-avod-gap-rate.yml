@@ -1,0 +1,42 @@
+version: 1
+name: "AVOD Licensing Gap Rate by Genre"
+slug: "genre-avod-gap-rate"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_genre_licensing"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions:
+    - "fct_genre_licensing_genre"
+  metrics:
+    - "fct_genre_licensing_mean_avod_gap_rate"
+  filters: {}
+  sorts:
+    - fieldId: "fct_genre_licensing_mean_avod_gap_rate"
+      descending: true
+  limit: 15
+
+chartConfig:
+  type: "cartesian"
+  config:
+    layout:
+      xField: "fct_genre_licensing_genre"
+      yField:
+        - "fct_genre_licensing_mean_avod_gap_rate"
+      flipAxes: true
+    eChartsConfig:
+      xAxis:
+        - name: "Gap Rate (fraction of titles with demand but no AVOD offer)"
+      yAxis:
+        - name: "Genre"
+      grid:
+        containLabel: true
+      series:
+        - type: "bar"
+          name: "AVOD Gap Rate"
+          color: "#EF4444"
+          encode:
+            xRef:
+              field: "fct_genre_licensing_genre"
+            yRef:
+              field: "fct_genre_licensing_mean_avod_gap_rate"

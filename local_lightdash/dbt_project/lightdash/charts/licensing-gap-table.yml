@@ -1,0 +1,64 @@
+version: 1
+name: "Licensing Gap Titles — Detail Table"
+slug: "licensing-gap-table"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_underserved_demand"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions:
+    - "fct_underserved_demand_demand_gap_rank"
+    - "fct_underserved_demand_title"
+    - "fct_underserved_demand_object_type"
+    - "fct_underserved_demand_genres"
+    - "fct_underserved_demand_market_count"
+    - "fct_underserved_demand_has_svod_offer"
+    - "fct_underserved_demand_has_tvod_offer"
+  metrics:
+    - "fct_underserved_demand_total_avod_score"
+    - "fct_underserved_demand_sum_watchlist_adds"
+  filters: {}
+  sorts:
+    - fieldId: "fct_underserved_demand_demand_gap_rank"
+      descending: false
+  limit: 100
+
+chartConfig:
+  type: "table"
+  config:
+    showColumnCalculation: false
+    hideRowNumbers: false
+    showResultsTotal: true
+    columns:
+      fct_underserved_demand_demand_gap_rank:
+        name: "Rank"
+        frozen: true
+      fct_underserved_demand_title:
+        name: "Title"
+        frozen: true
+      fct_underserved_demand_object_type:
+        name: "Type"
+      fct_underserved_demand_genres:
+        name: "Genres"
+      fct_underserved_demand_market_count:
+        name: "Markets"
+      fct_underserved_demand_has_svod_offer:
+        name: "SVOD Offer?"
+      fct_underserved_demand_has_tvod_offer:
+        name: "TVOD Offer?"
+      fct_underserved_demand_total_avod_score:
+        name: "AVOD Score"
+        displayStyle: "bar"
+        color: "#10B981"
+      fct_underserved_demand_sum_watchlist_adds:
+        name: "Watchlist Adds"
+    conditionalFormattings:
+      - target:
+          fieldId: "fct_underserved_demand_total_avod_score"
+        color:
+          start: "#ECFDF5"
+          end: "#10B981"
+        rule:
+          min: "auto"
+          max: "auto"
+        applyTo: "cell"

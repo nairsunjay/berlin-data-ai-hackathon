@@ -1,0 +1,51 @@
+version: 1
+name: "AVOD vs TVOD Score by Genre"
+slug: "genre-avod-tvod-comparison"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_genre_licensing"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions:
+    - "fct_genre_licensing_genre"
+  metrics:
+    - "fct_genre_licensing_sum_avod_score"
+    - "fct_genre_licensing_sum_tvod_score"
+  filters: {}
+  sorts:
+    - fieldId: "fct_genre_licensing_sum_avod_score"
+      descending: true
+  limit: 15
+
+chartConfig:
+  type: "cartesian"
+  config:
+    layout:
+      xField: "fct_genre_licensing_genre"
+      yField:
+        - "fct_genre_licensing_sum_avod_score"
+        - "fct_genre_licensing_sum_tvod_score"
+    eChartsConfig:
+      legend:
+        show: true
+      xAxis:
+        - name: "Genre"
+      yAxis:
+        - name: "Score"
+      series:
+        - type: "bar"
+          name: "AVOD Score"
+          color: "#6366F1"
+          encode:
+            xRef:
+              field: "fct_genre_licensing_genre"
+            yRef:
+              field: "fct_genre_licensing_sum_avod_score"
+        - type: "bar"
+          name: "TVOD Score"
+          color: "#F59E0B"
+          encode:
+            xRef:
+              field: "fct_genre_licensing_genre"
+            yRef:
+              field: "fct_genre_licensing_sum_tvod_score"

@@ -1,0 +1,22 @@
+version: 1
+name: "KPI — AVOD Clickouts on Gap Titles"
+slug: "kpi-avod-gap-demand"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_underserved_demand"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions: []
+  metrics:
+    - "fct_underserved_demand_sum_avod_clickouts"
+  filters: {}
+  sorts: []
+  limit: 1
+
+chartConfig:
+  type: "big_number"
+  config:
+    selectedField: "fct_underserved_demand_sum_avod_clickouts"
+    label: "AVOD Clickouts on Gap Titles"
+    style: "K"
+    showBigNumberLabel: true

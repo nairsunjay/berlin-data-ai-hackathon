@@ -1,0 +1,21 @@
+version: 1
+name: "KPI — Overall AVOD vs TVOD Demand Ratio"
+slug: "kpi-avod-tvod-ratio"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_genre_licensing"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions: []
+  metrics:
+    - "fct_genre_licensing_mean_avod_tvod_ratio"
+  filters: {}
+  sorts: []
+  limit: 1
+
+chartConfig:
+  type: "big_number"
+  config:
+    selectedField: "fct_genre_licensing_mean_avod_tvod_ratio"
+    label: "AVOD / TVOD Demand Ratio"
+    showBigNumberLabel: true

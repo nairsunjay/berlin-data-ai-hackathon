@@ -1,0 +1,22 @@
+version: 1
+name: "KPI — Total Users Engaged with Scored Titles"
+slug: "kpi-total-users"
+spaceSlug: "licensing-intelligence"
+tableName: "fct_licensing_priority"
+updatedAt: "2026-03-23T00:00:00.000Z"
+
+metricQuery:
+  dimensions: []
+  metrics:
+    - "fct_licensing_priority_sum_users"
+  filters: {}
+  sorts: []
+  limit: 1
+
+chartConfig:
+  type: "big_number"
+  config:
+    selectedField: "fct_licensing_priority_sum_users"
+    label: "Users Engaged with Scored Content"
+    style: "M"
+    showBigNumberLabel: true
