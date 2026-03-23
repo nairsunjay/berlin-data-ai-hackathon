@@ -497,7 +497,6 @@
     }
 
     // ── Try ElevenLabs first ──
-    console.log("[LQ] ElevenLabs key present:", !!apiKey, "key length:", apiKey ? apiKey.length : 0);
     if (apiKey) {
       try {
         const resp = await fetch(
@@ -600,27 +599,11 @@
     stopTTS();
     const panel = document.getElementById("lq-side-panel");
     if (panel) panel.remove();
-    // Restore layout
-    document.documentElement.style.removeProperty("overflow-x");
-    document.body.style.removeProperty("margin-right");
-    document.body.style.removeProperty("overflow-x");
-    const root = document.getElementById("root");
-    if (root) {
-      root.style.removeProperty("margin-right");
-      root.style.removeProperty("transition");
-    }
   }
 
   function openSidePanel() {
-    const panelWidth = 360;
-    document.documentElement.style.overflowX = "hidden";
-    document.body.style.overflowX = "hidden";
-    document.body.style.marginRight = panelWidth + "px";
-    const root = document.getElementById("root");
-    if (root) {
-      root.style.transition = "margin-right 0.2s ease";
-      root.style.marginRight = panelWidth + "px";
-    }
+    // Side panel overlays on the right — no content pushing
+    // (pushing via margin-right breaks position:fixed navbar)
   }
 
   function showExplanationByKey(key) {
