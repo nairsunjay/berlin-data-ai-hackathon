@@ -192,27 +192,39 @@
   // ── Inspect Mode (click-on-chart to explain) ────────────────
 
   // Maps chart/tile titles (from dashboard YAML) to EXPLANATIONS keys
+  // Dashboard detection
+  const DASHBOARD_AD_REVENUE = "ad-revenue";
+  const DASHBOARD_CHALLENGE6 = "challenge-6";
+
+  function detectDashboard() {
+    const url = window.location.href;
+    const title = document.title || "";
+    if (url.includes("ad-revenue") || title.includes("Ad Revenue")) return DASHBOARD_AD_REVENUE;
+    if (url.includes("challenge-6") || title.includes("Challenge 6")) return DASHBOARD_CHALLENGE6;
+    return null; // unknown — show all
+  }
+
   const TITLE_TO_EXPLANATION = {
     // Ad Revenue dashboard
-    "Total Est. Revenue Across 8 EU Markets": "kpi_total_revenue",
-    "Est. AVOD & TVOD Revenue by Market": "market_revenue",
-    "Revenue Efficiency (Per User)": "revenue_per_user",
-    "How revenue is estimated": "methodology",
-    "Top 20 Titles — Est. Ad Revenue (USD)": "top20_ad_revenue",
-    "Est. Ad Revenue vs Licensing Score": "revenue_vs_score",
-    "Est. Ad Revenue by Genre (Shows)": "genre_ad_revenue_shows",
-    "AVOD vs TVOD Demand by Genre": "genre_avod_tvod",
-    "Key genre insights": "genre_insights",
+    "Total Est. Revenue Across 8 EU Markets": { key: "kpi_total_revenue", dashboard: DASHBOARD_AD_REVENUE },
+    "Est. AVOD & TVOD Revenue by Market": { key: "market_revenue", dashboard: DASHBOARD_AD_REVENUE },
+    "Revenue Efficiency (Per User)": { key: "revenue_per_user", dashboard: DASHBOARD_AD_REVENUE },
+    "How revenue is estimated": { key: "methodology", dashboard: DASHBOARD_AD_REVENUE },
+    "Top 20 Titles — Est. Ad Revenue (USD)": { key: "top20_ad_revenue", dashboard: DASHBOARD_AD_REVENUE },
+    "Est. Ad Revenue vs Licensing Score": { key: "revenue_vs_score", dashboard: DASHBOARD_AD_REVENUE },
+    "Est. Ad Revenue by Genre (Shows)": { key: "genre_ad_revenue_shows", dashboard: DASHBOARD_AD_REVENUE },
+    "AVOD vs TVOD Demand by Genre": { key: "genre_avod_tvod", dashboard: DASHBOARD_AD_REVENUE },
+    "Key genre insights": { key: "genre_insights", dashboard: DASHBOARD_AD_REVENUE },
     // Challenge 6 dashboard
-    "Users Engaged with Scored Content": "kpi_users",
-    "AVOD Clickouts on Gap Titles": "kpi_avod_gap",
-    "AVOD / TVOD Demand Ratio": "kpi_ratio",
-    "Top 20 Licensing Priority Titles": "top20_priority",
-    "Top 20 Licensing Gap Titles": "top20_gap",
-    "Licensing Gap — Full List (Top 100)": "gap_table",
-    "AVOD vs TVOD Score by Genre": "ch6_genre_avod_tvod",
-    "AVOD Gap Rate by Genre": "ch6_gap_rate",
-    "How to read this": "ch6_genre_howto",
+    "Users Engaged with Scored Content": { key: "kpi_users", dashboard: DASHBOARD_CHALLENGE6 },
+    "AVOD Clickouts on Gap Titles": { key: "kpi_avod_gap", dashboard: DASHBOARD_CHALLENGE6 },
+    "AVOD / TVOD Demand Ratio": { key: "kpi_ratio", dashboard: DASHBOARD_CHALLENGE6 },
+    "Top 20 Licensing Priority Titles": { key: "top20_priority", dashboard: DASHBOARD_CHALLENGE6 },
+    "Top 20 Licensing Gap Titles": { key: "top20_gap", dashboard: DASHBOARD_CHALLENGE6 },
+    "Licensing Gap — Full List (Top 100)": { key: "gap_table", dashboard: DASHBOARD_CHALLENGE6 },
+    "AVOD vs TVOD Score by Genre": { key: "ch6_genre_avod_tvod", dashboard: DASHBOARD_CHALLENGE6 },
+    "AVOD Gap Rate by Genre": { key: "ch6_gap_rate", dashboard: DASHBOARD_CHALLENGE6 },
+    "How to read this": { key: "ch6_genre_howto", dashboard: DASHBOARD_CHALLENGE6 },
   };
 
   let _inspectActive = false;
@@ -229,8 +241,11 @@
     // Show instruction banner
     _inspectBanner = document.createElement("div");
     _inspectBanner.id = "lq-inspect-banner";
+    const dash = detectDashboard();
+    const dashLabel = dash === DASHBOARD_AD_REVENUE ? " (Ad Revenue)" :
+                      dash === DASHBOARD_CHALLENGE6 ? " (Challenge 6)" : "";
     _inspectBanner.innerHTML = `
-      <span>Click on any chart to explain it</span>
+      <span>Click on any chart to explain it${dashLabel}</span>
       <button id="lq-inspect-cancel">✕ Cancel</button>
     `;
     document.body.appendChild(_inspectBanner);
@@ -311,12 +326,24 @@
     const title = getTileTitle(tileEl);
     if (!title) return null;
 
+    const currentDash = detectDashboard();
+
     // Exact match
-    if (TITLE_TO_EXPLANATION[title]) return TITLE_TO_EXPLANATION[title];
+    const exact = TITLE_TO_EXPLANATION[title];
+    if (exact && (!currentDash || exact.dashboard === currentDash)) return exact.key;
 
     // Fuzzy: check if any known title is a substring
-    for (const [knownTitle, key] of Object.entries(TITLE_TO_EXPLANATION)) {
-      if (title.includes(knownTitle) || knownTitle.includes(title)) return key;
+    for (const [knownTitle, entry] of Object.entries(TITLE_TO_EXPLANATION)) {
+      if (currentDash && entry.dashboard !== currentDash) continue;
+      if (title.includes(knownTitle) || knownTitle.includes(title)) return entry.key;
+    }
+
+    // If no dashboard-filtered match, try without filter
+    if (currentDash) {
+      if (exact) return exact.key;
+      for (const [knownTitle, entry] of Object.entries(TITLE_TO_EXPLANATION)) {
+        if (title.includes(knownTitle) || knownTitle.includes(title)) return entry.key;
+      }
     }
 
     return null;
@@ -347,50 +374,253 @@
     if (!tile) return;
 
     const key = findExplanationKey(tile);
+
+    // Flash green highlight on selected tile
+    tile.style.transition = "box-shadow 0.2s ease, outline 0.2s ease";
+    tile.style.outline = "3px solid #51cf66";
+    tile.style.boxShadow = "0 0 20px rgba(81, 207, 102, 0.4)";
+
     exitInspectMode();
 
-    if (key && EXPLANATIONS[key]) {
-      showExplanationByKey(key);
-    } else {
-      const title = getTileTitle(tile) || "this chart";
-      showExplanationNotFound(title);
+    setTimeout(() => {
+      tile.style.outline = "";
+      tile.style.boxShadow = "";
+      tile.style.transition = "";
+
+      if (key && EXPLANATIONS[key]) {
+        showExplanationByKey(key);
+      } else {
+        const title = getTileTitle(tile) || "this chart";
+        showExplanationNotFound(title);
+      }
+    }, 400);
+  }
+
+  // ── Text-to-Speech (ElevenLabs with browser fallback) ───────
+
+  let _ttsAudio = null;
+  let _ttsTimer = null;
+  let _ttsBrowserUtterance = null;
+  let _ttsLoading = false;
+  const ELEVENLABS_VOICE = "JBFqnCBsd6RMkjVDRZzb"; // George
+
+  function stopTTS() {
+    _ttsLoading = false;
+    if (_ttsAudio) { _ttsAudio.pause(); _ttsAudio.src = ""; _ttsAudio = null; }
+    if (_ttsTimer) { clearInterval(_ttsTimer); _ttsTimer = null; }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    _ttsBrowserUtterance = null;
+    document.querySelectorAll(".lq-tts-word").forEach((el) => {
+      el.classList.remove("lq-tts-active");
+    });
+    const btn = document.getElementById("lq-tts-btn");
+    if (btn) {
+      btn.textContent = "🔊 Read aloud";
+      btn.classList.remove("lq-tts-playing");
+      btn.classList.remove("lq-tts-loading");
     }
   }
 
+  function getElevenLabsKey() {
+    let key = localStorage.getItem("lq_elevenlabs_key");
+    if (!key) {
+      key = prompt("Enter your ElevenLabs API key for natural TTS.\nFree at elevenlabs.io (10K chars/month).\n\nLeave empty to use browser voice.");
+      if (key) localStorage.setItem("lq_elevenlabs_key", key.trim());
+    }
+    return key ? key.trim() : null;
+  }
+
+  function stripHtml(html) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  }
+
+  function prepareTTSBody(container) {
+    const bodyEl = container.querySelector(".lq-explain-body");
+    const actionEl = container.querySelector(".lq-explain-action-text");
+    if (!bodyEl) return "";
+
+    const bodyText = stripHtml(bodyEl.innerHTML).trim();
+    const actionText = actionEl ? stripHtml(actionEl.innerHTML).trim() : "";
+    const fullText = bodyText + (actionText ? "\n\nAction: " + actionText : "");
+
+    // Wrap each word in body + action for highlighting
+    let wordIndex = 0;
+    bodyEl.innerHTML = bodyText.replace(/(\S+)/g, (match) => {
+      return '<span class="lq-tts-word" data-tts-idx="' + (wordIndex++) + '">' + escapeHtml(match) + '</span>';
+    });
+    if (actionEl) {
+      actionEl.innerHTML = actionText.replace(/(\S+)/g, (match) => {
+        return '<span class="lq-tts-word" data-tts-idx="' + (wordIndex++) + '">' + escapeHtml(match) + '</span>';
+      });
+    }
+
+    return fullText;
+  }
+
+  function highlightWord(panel, index) {
+    panel.querySelectorAll(".lq-tts-word.lq-tts-active").forEach((el) => el.classList.remove("lq-tts-active"));
+    const wordEl = panel.querySelector('.lq-tts-word[data-tts-idx="' + index + '"]');
+    if (wordEl) {
+      wordEl.classList.add("lq-tts-active");
+      wordEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }
+
+  function startHighlightTimer(panel, totalWords, audio) {
+    _ttsTimer = setInterval(function () {
+      if (!audio || audio.paused || !audio.duration) return;
+      var progress = audio.currentTime / audio.duration;
+      var wordIdx = Math.floor(progress * totalWords);
+      if (wordIdx >= totalWords) wordIdx = totalWords - 1;
+      highlightWord(panel, wordIdx);
+    }, 80);
+  }
+
+  async function startTTS(panel) {
+    if (_ttsLoading) return; // prevent double invocation
+    stopTTS();
+
+    const fullText = prepareTTSBody(panel);
+    if (!fullText) return;
+
+    const totalWords = (fullText.match(/\S+/g) || []).length;
+    const apiKey = getElevenLabsKey();
+
+    // Update button to loading state
+    _ttsLoading = true;
+    const btn = document.getElementById("lq-tts-btn");
+    if (btn) {
+      btn.innerHTML = '<span class="lq-spinner-inline"></span> Loading audio...';
+      btn.classList.add("lq-tts-loading");
+    }
+
+    // ── Try ElevenLabs first ──
+    console.log("[LQ] ElevenLabs key present:", !!apiKey, "key length:", apiKey ? apiKey.length : 0);
+    if (apiKey) {
+      try {
+        const resp = await fetch(
+          "https://api.elevenlabs.io/v1/text-to-speech/" + ELEVENLABS_VOICE,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
+            body: JSON.stringify({
+              text: fullText,
+              model_id: "eleven_v3",
+              output_format: "mp3_44100_128",
+            }),
+          }
+        );
+        if (!resp.ok) {
+          console.warn("[LQ] ElevenLabs error:", resp.status, "— falling back to browser TTS");
+          if (resp.status === 401 || resp.status === 402) {
+            localStorage.removeItem("lq_elevenlabs_key");
+            alert(resp.status === 401
+              ? "Invalid ElevenLabs API key. Cleared. Try again."
+              : "ElevenLabs quota exhausted. Key cleared — enter a new key next time.");
+            stopTTS();
+            return;
+          }
+          // 402 (quota) or other errors: fall through to browser TTS
+          throw new Error("ElevenLabs " + resp.status);
+        }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        _ttsLoading = false;
+        _ttsAudio = new Audio(url);
+        const btnNow = document.getElementById("lq-tts-btn");
+        if (btnNow) {
+          btnNow.textContent = "🔊 Speaking...";
+          btnNow.classList.remove("lq-tts-loading");
+          btnNow.classList.add("lq-tts-playing");
+        }
+        _ttsAudio.addEventListener("loadedmetadata", function () {
+          startHighlightTimer(panel, totalWords, _ttsAudio);
+        });
+        _ttsAudio.addEventListener("ended", function () {
+          stopTTS();
+          URL.revokeObjectURL(url);
+        });
+        _ttsAudio.play();
+        return;
+      } catch (err) {
+        console.error("[LQ] ElevenLabs failed, falling back:", err);
+      }
+    }
+
+    // ── Fallback: browser TTS ──
+    _ttsLoading = false;
+    if (!window.speechSynthesis) { stopTTS(); return; }
+    const btnFallback = document.getElementById("lq-tts-btn");
+    if (btnFallback) {
+      btnFallback.textContent = "🔊 Speaking...";
+      btnFallback.classList.remove("lq-tts-loading");
+      btnFallback.classList.add("lq-tts-playing");
+    }
+
+    var utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.lang = "en-US";
+    utterance.rate = 0.95;
+
+    var voices = window.speechSynthesis.getVoices();
+    var prefs = [/Google US English/i, /Samantha/i, /Ava/i, /Jenny/i];
+    for (var p = 0; p < prefs.length; p++) {
+      var v = voices.find(function (v) { return v.lang.startsWith("en") && prefs[p].test(v.name); });
+      if (v) { utterance.voice = v; break; }
+    }
+
+    var words = fullText.match(/\S+/g) || [];
+    var wordPositions = [];
+    var wpos = 0;
+    words.forEach(function (word, i) {
+      var idx = fullText.indexOf(word, wpos);
+      wordPositions.push({ start: idx, end: idx + word.length, index: i });
+      wpos = idx + word.length;
+    });
+
+    utterance.onboundary = function (event) {
+      if (event.name !== "word") return;
+      var wp = wordPositions.find(function (w) { return event.charIndex >= w.start && event.charIndex < w.end; });
+      if (wp) highlightWord(panel, wp.index);
+    };
+    utterance.onend = function () { stopTTS(); };
+    utterance.onerror = function () { stopTTS(); };
+    _ttsBrowserUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Ensure voices are loaded
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function () { window.speechSynthesis.getVoices(); };
+  }
+
   function closeSidePanel() {
+    stopTTS();
     const panel = document.getElementById("lq-side-panel");
     if (panel) panel.remove();
-    // Restore containers
-    const containers = [
-      document.getElementById("root"),
-      document.querySelector('[class*="AppContainer"]'),
-      document.querySelector('[class*="app-container"]'),
-      document.querySelector("main"),
-      document.body,
-    ].filter(Boolean);
-    containers.forEach((el) => {
-      el.style.removeProperty("width");
-      el.style.removeProperty("max-width");
-      el.style.removeProperty("overflow-x");
-    });
+    // Restore layout
     document.documentElement.style.removeProperty("overflow-x");
+    document.body.style.removeProperty("margin-right");
+    document.body.style.removeProperty("overflow-x");
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.removeProperty("margin-right");
+      root.style.removeProperty("transition");
+    }
   }
 
   function openSidePanel() {
     const panelWidth = 360;
-    const containers = [
-      document.getElementById("root"),
-      document.querySelector('[class*="AppContainer"]'),
-      document.querySelector('[class*="app-container"]'),
-      document.querySelector("main"),
-      document.body,
-    ].filter(Boolean);
-    containers.forEach((el) => {
-      el.style.width = `calc(100vw - ${panelWidth}px)`;
-      el.style.maxWidth = `calc(100vw - ${panelWidth}px)`;
-      el.style.overflowX = "hidden";
-    });
     document.documentElement.style.overflowX = "hidden";
+    document.body.style.overflowX = "hidden";
+    document.body.style.marginRight = panelWidth + "px";
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.transition = "margin-right 0.2s ease";
+      root.style.marginRight = panelWidth + "px";
+    }
   }
 
   function showExplanationByKey(key) {
@@ -419,6 +649,20 @@
       </div>
     `;
     panel.querySelector(".lq-close").addEventListener("click", closeSidePanel);
+
+    // TTS button
+    const ttsBtn = document.createElement("button");
+    ttsBtn.id = "lq-tts-btn";
+    ttsBtn.className = "lq-tts-btn";
+    ttsBtn.textContent = "🔊 Read aloud";
+    ttsBtn.addEventListener("click", () => {
+      if (_ttsLoading || _ttsAudio || _ttsBrowserUtterance) {
+        stopTTS();
+      } else {
+        startTTS(panel);
+      }
+    });
+    panel.appendChild(ttsBtn);
 
     const again = document.createElement("button");
     again.className = "lq-submit";
@@ -928,6 +1172,34 @@
     }
     return depth;
   }
+
+  // ── Global Keyboard Shortcuts ─────────────────────────────
+  document.addEventListener("keydown", (e) => {
+    // Don't intercept if user is typing in an input/textarea
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+
+    // Esc — close side panel or overlay
+    if (e.key === "Escape") {
+      const sidePanel = document.getElementById("lq-side-panel");
+      if (sidePanel) { closeSidePanel(); return; }
+      const overlay = document.getElementById("lq-overlay");
+      if (overlay) { closeOverlay(); return; }
+    }
+
+    // Space — toggle TTS when side panel is open
+    if (e.key === " " || e.code === "Space") {
+      const sidePanel = document.getElementById("lq-side-panel");
+      if (sidePanel) {
+        e.preventDefault();
+        if (_ttsLoading || _ttsAudio || _ttsBrowserUtterance) {
+          stopTTS();
+        } else {
+          startTTS(sidePanel);
+        }
+      }
+    }
+  });
 
   // ── Initialize ──────────────────────────────────────────────
   function init() {
