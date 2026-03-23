@@ -161,6 +161,13 @@
       value: option.value || option.label,
     });
 
+    // "Explain Analysis" → enter inspect mode immediately
+    if (option.label === "Explain Analysis") {
+      closeOverlay();
+      enterInspectMode();
+      return;
+    }
+
     if (option.next) {
       currentNodeKey = option.next;
       renderOverlay();
@@ -180,6 +187,285 @@
     const prev = answers.pop();
     currentNodeKey = prev.nodeKey;
     renderOverlay();
+  }
+
+  // ── Inspect Mode (click-on-chart to explain) ────────────────
+
+  // Maps chart/tile titles (from dashboard YAML) to EXPLANATIONS keys
+  const TITLE_TO_EXPLANATION = {
+    // Ad Revenue dashboard
+    "Total Est. Revenue Across 8 EU Markets": "kpi_total_revenue",
+    "Est. AVOD & TVOD Revenue by Market": "market_revenue",
+    "Revenue Efficiency (Per User)": "revenue_per_user",
+    "How revenue is estimated": "methodology",
+    "Top 20 Titles — Est. Ad Revenue (USD)": "top20_ad_revenue",
+    "Est. Ad Revenue vs Licensing Score": "revenue_vs_score",
+    "Est. Ad Revenue by Genre (Shows)": "genre_ad_revenue_shows",
+    "AVOD vs TVOD Demand by Genre": "genre_avod_tvod",
+    "Key genre insights": "genre_insights",
+    // Challenge 6 dashboard
+    "Users Engaged with Scored Content": "kpi_users",
+    "AVOD Clickouts on Gap Titles": "kpi_avod_gap",
+    "AVOD / TVOD Demand Ratio": "kpi_ratio",
+    "Top 20 Licensing Priority Titles": "top20_priority",
+    "Top 20 Licensing Gap Titles": "top20_gap",
+    "Licensing Gap — Full List (Top 100)": "gap_table",
+    "AVOD vs TVOD Score by Genre": "ch6_genre_avod_tvod",
+    "AVOD Gap Rate by Genre": "ch6_gap_rate",
+    "How to read this": "ch6_genre_howto",
+  };
+
+  let _inspectActive = false;
+  let _inspectHighlight = null;
+  let _inspectBanner = null;
+
+  function enterInspectMode() {
+    if (_inspectActive) return;
+    _inspectActive = true;
+
+    // Add inspect cursor to body
+    document.body.style.cursor = "crosshair";
+
+    // Show instruction banner
+    _inspectBanner = document.createElement("div");
+    _inspectBanner.id = "lq-inspect-banner";
+    _inspectBanner.innerHTML = `
+      <span>Click on any chart to explain it</span>
+      <button id="lq-inspect-cancel">✕ Cancel</button>
+    `;
+    document.body.appendChild(_inspectBanner);
+    document.getElementById("lq-inspect-cancel").addEventListener("click", exitInspectMode);
+
+    // Create highlight overlay element
+    _inspectHighlight = document.createElement("div");
+    _inspectHighlight.id = "lq-inspect-highlight";
+    document.body.appendChild(_inspectHighlight);
+
+    // Bind events
+    document.addEventListener("mousemove", inspectMouseMove, true);
+    document.addEventListener("click", inspectClick, true);
+    document.addEventListener("keydown", inspectKeyDown, true);
+  }
+
+  function exitInspectMode() {
+    if (!_inspectActive) return;
+    _inspectActive = false;
+
+    document.body.style.cursor = "";
+
+    if (_inspectBanner) { _inspectBanner.remove(); _inspectBanner = null; }
+    if (_inspectHighlight) { _inspectHighlight.remove(); _inspectHighlight = null; }
+
+    document.removeEventListener("mousemove", inspectMouseMove, true);
+    document.removeEventListener("click", inspectClick, true);
+    document.removeEventListener("keydown", inspectKeyDown, true);
+  }
+
+  function inspectKeyDown(e) {
+    if (e.key === "Escape") exitInspectMode();
+  }
+
+  function findTileElement(el) {
+    // Walk up from the hovered element to find a Lightdash dashboard tile
+    let node = el;
+    while (node && node !== document.body) {
+      // Lightdash tiles typically have role, data attributes, or class patterns
+      if (node.classList && (
+        node.classList.toString().includes("tile") ||
+        node.classList.toString().includes("Tile") ||
+        node.classList.toString().includes("ChartView") ||
+        node.getAttribute("data-testid")?.includes("tile")
+      )) {
+        return node;
+      }
+      // Also match grid items in the dashboard
+      if (node.classList && node.classList.toString().includes("react-grid-item")) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function getTileTitle(tileEl) {
+    // Try to find the tile's title text
+    // Lightdash renders tile headers with the chart title
+    const headerEl = tileEl.querySelector('[class*="TileHeader"] span, [class*="tileHeader"] span, [class*="Title"], header span');
+    if (headerEl) return headerEl.textContent.trim();
+
+    // Fallback: look for any heading-like text in the tile
+    const h = tileEl.querySelector("h3, h4, h5, [class*=\"title\"], [class*=\"Title\"]");
+    if (h) return h.textContent.trim();
+
+    // Fallback: first span in the tile that matches a known title
+    const spans = tileEl.querySelectorAll("span");
+    for (const s of spans) {
+      const text = s.textContent.trim();
+      if (TITLE_TO_EXPLANATION[text]) return text;
+    }
+
+    return null;
+  }
+
+  function findExplanationKey(tileEl) {
+    const title = getTileTitle(tileEl);
+    if (!title) return null;
+
+    // Exact match
+    if (TITLE_TO_EXPLANATION[title]) return TITLE_TO_EXPLANATION[title];
+
+    // Fuzzy: check if any known title is a substring
+    for (const [knownTitle, key] of Object.entries(TITLE_TO_EXPLANATION)) {
+      if (title.includes(knownTitle) || knownTitle.includes(title)) return key;
+    }
+
+    return null;
+  }
+
+  function inspectMouseMove(e) {
+    const tile = findTileElement(e.target);
+    if (tile && _inspectHighlight) {
+      const rect = tile.getBoundingClientRect();
+      _inspectHighlight.style.display = "block";
+      _inspectHighlight.style.top = rect.top + window.scrollY + "px";
+      _inspectHighlight.style.left = rect.left + window.scrollX + "px";
+      _inspectHighlight.style.width = rect.width + "px";
+      _inspectHighlight.style.height = rect.height + "px";
+
+      const title = getTileTitle(tile);
+      _inspectHighlight.setAttribute("data-label", title || "Unknown chart");
+    } else if (_inspectHighlight) {
+      _inspectHighlight.style.display = "none";
+    }
+  }
+
+  function inspectClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const tile = findTileElement(e.target);
+    if (!tile) return;
+
+    const key = findExplanationKey(tile);
+    exitInspectMode();
+
+    if (key && EXPLANATIONS[key]) {
+      showExplanationByKey(key);
+    } else {
+      const title = getTileTitle(tile) || "this chart";
+      showExplanationNotFound(title);
+    }
+  }
+
+  function closeSidePanel() {
+    const panel = document.getElementById("lq-side-panel");
+    if (panel) panel.remove();
+    // Restore containers
+    const containers = [
+      document.getElementById("root"),
+      document.querySelector('[class*="AppContainer"]'),
+      document.querySelector('[class*="app-container"]'),
+      document.querySelector("main"),
+      document.body,
+    ].filter(Boolean);
+    containers.forEach((el) => {
+      el.style.removeProperty("width");
+      el.style.removeProperty("max-width");
+      el.style.removeProperty("overflow-x");
+    });
+    document.documentElement.style.removeProperty("overflow-x");
+  }
+
+  function openSidePanel() {
+    const panelWidth = 360;
+    const containers = [
+      document.getElementById("root"),
+      document.querySelector('[class*="AppContainer"]'),
+      document.querySelector('[class*="app-container"]'),
+      document.querySelector("main"),
+      document.body,
+    ].filter(Boolean);
+    containers.forEach((el) => {
+      el.style.width = `calc(100vw - ${panelWidth}px)`;
+      el.style.maxWidth = `calc(100vw - ${panelWidth}px)`;
+      el.style.overflowX = "hidden";
+    });
+    document.documentElement.style.overflowX = "hidden";
+  }
+
+  function showExplanationByKey(key) {
+    const info = EXPLANATIONS[key];
+    if (!info) return;
+
+    closeSidePanel();
+    openSidePanel();
+
+    const panel = document.createElement("div");
+    panel.id = "lq-side-panel";
+
+    panel.innerHTML = `
+      <div class="lq-header">
+        <h3 class="lq-title">${info.title}</h3>
+        <button class="lq-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="lq-explain-meta">
+        <span class="lq-explain-tag lq-tag-chart">${info.chart}</span>
+        <span class="lq-explain-tag lq-tag-model">${info.model}</span>
+      </div>
+      <div class="lq-explain-body">${info.explanation}</div>
+      <div class="lq-explain-action">
+        <div class="lq-explain-action-label">What to do with this</div>
+        <div class="lq-explain-action-text">${info.action}</div>
+      </div>
+    `;
+    panel.querySelector(".lq-close").addEventListener("click", closeSidePanel);
+
+    const again = document.createElement("button");
+    again.className = "lq-submit";
+    again.textContent = "Inspect another chart";
+    again.addEventListener("click", () => {
+      closeSidePanel();
+      enterInspectMode();
+    });
+    panel.appendChild(again);
+
+    const restart = document.createElement("button");
+    restart.className = "lq-submit lq-submit-secondary";
+    restart.textContent = "Back to menu";
+    restart.addEventListener("click", () => {
+      closeSidePanel();
+      openQuestionnaire();
+    });
+    panel.appendChild(restart);
+
+    document.body.appendChild(panel);
+  }
+
+  function showExplanationNotFound(title) {
+    closeSidePanel();
+    openSidePanel();
+
+    const panel = document.createElement("div");
+    panel.id = "lq-side-panel";
+    panel.innerHTML = `
+      <div class="lq-header">
+        <h3 class="lq-title">No explanation available</h3>
+        <button class="lq-close" aria-label="Close">&times;</button>
+      </div>
+      <p style="color:#868e96;font-size:14px;margin:16px 0">Could not find an explanation for <strong>"${title}"</strong>. Try clicking on a chart tile.</p>
+    `;
+    panel.querySelector(".lq-close").addEventListener("click", closeSidePanel);
+
+    const again = document.createElement("button");
+    again.className = "lq-submit";
+    again.textContent = "Try again";
+    again.addEventListener("click", () => {
+      closeSidePanel();
+      enterInspectMode();
+    });
+    panel.appendChild(again);
+
+    document.body.appendChild(panel);
   }
 
   // ── Explanation Screen (inline, no AI) ──────────────────────
