@@ -403,6 +403,7 @@
   let _ttsBrowserUtterance = null;
   let _ttsLoading = false;
   const ELEVENLABS_VOICE = "JBFqnCBsd6RMkjVDRZzb"; // George
+  const _ttsCache = new Map(); // text → blob URL cache
 
   function stopTTS() {
     _ttsLoading = false;
@@ -496,36 +497,42 @@
       btn.classList.add("lq-tts-loading");
     }
 
-    // ── Try ElevenLabs first ──
+    // ── Try ElevenLabs first (with in-memory cache) ──
     if (apiKey) {
       try {
-        const resp = await fetch(
-          "https://api.elevenlabs.io/v1/text-to-speech/" + ELEVENLABS_VOICE,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
-            body: JSON.stringify({
-              text: fullText,
-              model_id: "eleven_v3",
-              output_format: "mp3_44100_128",
-            }),
+        let url = _ttsCache.get(fullText);
+        if (!url) {
+          // Cache miss — fetch from API
+          const resp = await fetch(
+            "https://api.elevenlabs.io/v1/text-to-speech/" + ELEVENLABS_VOICE,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "xi-api-key": apiKey },
+              body: JSON.stringify({
+                text: fullText,
+                model_id: "eleven_v3",
+                output_format: "mp3_44100_128",
+              }),
+            }
+          );
+          if (!resp.ok) {
+            console.warn("[LQ] ElevenLabs error:", resp.status, "— falling back to browser TTS");
+            if (resp.status === 401 || resp.status === 402) {
+              localStorage.removeItem("lq_elevenlabs_key");
+              alert(resp.status === 401
+                ? "Invalid ElevenLabs API key. Cleared. Try again."
+                : "ElevenLabs quota exhausted. Key cleared — enter a new key next time.");
+              stopTTS();
+              return;
+            }
+            throw new Error("ElevenLabs " + resp.status);
           }
-        );
-        if (!resp.ok) {
-          console.warn("[LQ] ElevenLabs error:", resp.status, "— falling back to browser TTS");
-          if (resp.status === 401 || resp.status === 402) {
-            localStorage.removeItem("lq_elevenlabs_key");
-            alert(resp.status === 401
-              ? "Invalid ElevenLabs API key. Cleared. Try again."
-              : "ElevenLabs quota exhausted. Key cleared — enter a new key next time.");
-            stopTTS();
-            return;
-          }
-          // 402 (quota) or other errors: fall through to browser TTS
-          throw new Error("ElevenLabs " + resp.status);
+          const blob = await resp.blob();
+          url = URL.createObjectURL(blob);
+          _ttsCache.set(fullText, url); // cache for instant replay
+        } else {
+          console.log("[LQ] TTS cache hit — skipping API call");
         }
-        const blob = await resp.blob();
-        const url = URL.createObjectURL(blob);
         _ttsLoading = false;
         _ttsAudio = new Audio(url);
         const btnNow = document.getElementById("lq-tts-btn");
@@ -539,7 +546,6 @@
         });
         _ttsAudio.addEventListener("ended", function () {
           stopTTS();
-          URL.revokeObjectURL(url);
         });
         _ttsAudio.play();
         return;
@@ -666,6 +672,9 @@
     panel.appendChild(restart);
 
     document.body.appendChild(panel);
+
+    // Auto-start TTS when panel opens
+    startTTS(panel);
   }
 
   function showExplanationNotFound(title) {
